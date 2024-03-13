@@ -24,6 +24,7 @@ class Listing(models.Model):
     watchlist = models.ManyToManyField(User, blank=True, related_name="watchlists")
     winner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="wins")
     
+    
     def __str__(self):
         return f"\"{self.title}\""
 
@@ -32,6 +33,7 @@ class Bid(models.Model):
     amount = models.DecimalField(max_digits=100, decimal_places=2)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     item = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
+
 
     def __str__(self):
         return f"${self.amount} bid by {self.user} for {self.item}"

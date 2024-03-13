@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-
+from django import forms
 from .models import User
 
 
@@ -40,7 +41,7 @@ def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-
+        
         # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
@@ -61,3 +62,27 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+
+# listing form
+class ListingForm(forms.Form):
+    title = forms.CharField(
+        max_length=100, 
+        label='', 
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Saisir un titre',
+            'class': 'form-control container'
+        })
+        
+    )
+    description = forms.CharField(max_length=1000)
+    price = forms.DecimalField(max_digits=10, decimal_places=2)
+    image = forms.URLField()
+
+
+@login_required(login_url="login")
+def new_listing(request):
+    form = ListingForm()
+    return render(request, "auctions/new_listing.html", {
+        "form": form
+    })
