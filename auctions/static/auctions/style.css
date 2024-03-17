@@ -1,0 +1,21 @@
+
+form{
+    box-shadow: 10px 10px 15px rgb(100, 100, 100);
+    border-radius: 6px;
+    background-image: linear-gradient(rgb(252, 102, 72), rgb(255, 255, 255));
+}
+
+input[type="submit"]{
+    background-color: rgb(77, 77, 244);
+    border: none;
+    border-radius: 6px;
+    padding: 6px 15px;
+}
+
+.textarea{
+    border-radius: 6px;
+}
+
+#description{
+    height: 70px;
+}

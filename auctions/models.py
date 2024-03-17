@@ -17,16 +17,18 @@ class Listing(models.Model):
     description = models.TextField()
     publication_datetime = models.DateTimeField(default=timezone.now)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    bid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     image = models.URLField(blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     is_active = models.BooleanField(default=True)
     watchlist = models.ManyToManyField(User, blank=True, related_name="watchlists")
     winner = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="wins")
-    
-    
+
+
     def __str__(self):
         return f"\"{self.title}\""
+
 
 
 class Bid(models.Model):
