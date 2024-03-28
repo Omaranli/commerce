@@ -19,3 +19,32 @@ input[type="submit"]{
 #description{
     height: 70px;
 }
+
+.navbar{
+    background-color: rgb(177, 25, 25);
+}
+
+h1{
+    color: red;
+}
+
+.auctions{
+    color: white;
+}
+
+#navbarText a{
+    color: rgb(0, 255, 128);
+}
+
+#navbarText {
+    margin-left: 2%;
+}
+
+.login-form{
+    height: 50vh;
+}
+
+.message-error-login{
+    color: red;
+}
+
