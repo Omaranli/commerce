@@ -8,6 +8,7 @@ from django import forms
 from .models import User
 from .models import Listing
 from .models import Category
+from .models import Comment
 
 
 def index(request):
@@ -19,7 +20,6 @@ def index(request):
 
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
@@ -114,7 +114,6 @@ class ListingForm(forms.Form):
             'class': 'col-12 textarea',
             'id': 'exampleFormControlTextarea1',
             'rows': "5"
-
         })
         )
 
@@ -130,7 +129,7 @@ def new_listing(request):
             price = form.cleaned_data['price']
             image = form.cleaned_data.get('image') 
             description = form.cleaned_data['description']
-            listing = Listing.objects.create(title=title, price=price, bid=price ,description=description, creator=user)
+            listing = Listing.objects.create(title=title, price=price, description=description, creator=user)
             if category:
                 listing.category = category
             if image:
@@ -145,6 +144,36 @@ def new_listing(request):
 
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
+    user = request.user
+    is_in_watchlist = listing in user.watchlist.all()
     return render(request, "auctions/listing.html", {
-        "listing": listing
+        "listing": listing,
+        "is_in_watchlist": is_in_watchlist
+    })
+
+
+@login_required(login_url="login")
+def add_to_watchlist(request, listing_id):
+    user = request.user
+    listing = Listing.objects.get(pk=listing_id)
+    if request.method == "POST":
+        user.watchlist.add(listing) 
+        return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    
+    
+@login_required(login_url="login")
+def remove_to_watchlist(request, listing_id):
+    user = request.user
+    listing = Listing.objects.get(pk=listing_id)
+    if request.method == "POST":
+        user.watchlist.remove(listing) 
+        return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    
+
+@login_required(login_url="login")
+def watchlist(request):
+    user = request.user
+    watchlists = user.watchlist.all()
+    return render(request, "auctions/watchlist.html", {
+        "watchlist": watchlists
     })

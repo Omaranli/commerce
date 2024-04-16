@@ -1,10 +1,10 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2 align="center" class="m-3">Active Listings</h2>
+    <h2 align="center" class="m-3">watchlist</h2>
     <div class="container-fluid">
         <div class="row d-flex flex-wrap justify-content-center">
-            {% for listing in listings %}
+            {% for listing in watchlist %}
                 <div class="col-12 col-sm-6 col-lg-2 border mx-3 mb-5">
                     <div class="row">
                         {% if listing.is_active %}
@@ -50,6 +50,9 @@
                         </div>
                     </div>
                 </div>
+                {% empty %}
+                <div class="col-12 text-center mt-5"><h2>No listing added in your watchlist</h2></div>
+                <div class=""><a href="{% url 'index' %}">active listings</a></div>
             {% endfor %}
         </div>
     </div>
