@@ -54,7 +54,11 @@
                                 <a class="nav-link" href="{% url 'new_listing' %}">new listing</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'display_watchlist' %}">my watchlist</a>
+                                <a class="nav-link" href="{% url 'display_watchlist' %}">watchlist
+                                    <sup class="px-2" style="color: #000000; font-size: 14px; border: solid 1px white; border-radius: 10px; background-color: #ffffff;">
+                                        {{ user.watchlist.count }}
+                                    </sup>
+                                </a>
                             </li>
                         {% endif %}
                     </ul>

@@ -9,12 +9,15 @@ from .models import User
 from .models import Listing
 from .models import Category
 from .models import Comment
+from .models import Bid
 
 
 def index(request):
     listings = Listing.objects.all()
+    user = request.user
     return render(request, "auctions/index.html", {
         "listings": listings,
+        "user": user
     })
 
 
@@ -142,13 +145,17 @@ def new_listing(request):
         "form": form
     })
 
+
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
     user = request.user
-    is_in_watchlist = listing in user.watchlist.all()
+    if user.is_authenticated:
+        is_in_watchlist = listing in user.watchlist.all()
+    else:
+        is_in_watchlist = False
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "is_in_watchlist": is_in_watchlist
+        "is_in_watchlist": is_in_watchlist,
     })
 
 
@@ -177,3 +184,47 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html", {
         "watchlist": watchlists
     })
+
+
+@login_required(login_url="login")
+def bid(request, listing_id):
+    message = ""
+    was_auctioned = False
+    user = request.user
+    listing = Listing.objects.get(pk=listing_id)
+    if request.method == "POST":
+        placed_bid = float(request.POST["bid"])
+        if listing.bid and placed_bid <= listing.bid:
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "message": "Error: Your bid must be higher than the current bid."
+            }) 
+        elif placed_bid <= listing.price:
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "message": "Error: Your bid must be higher than the starting price."
+            })
+        else:
+            listing.bid = placed_bid
+            was_auctioned = True
+        if was_auctioned:
+            listing.save()  # Sauvegarder les modifications de l'annonce
+            Bid.objects.create(amount=placed_bid, user=user, item=listing)
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "message": "Your bid has been added successfully. You're in first position."
+            })
+        return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+        })
+
+
+@login_required(login_url="login")
+def watchlist(request):
+    user = request.user
+    watchlists = user.watchlist.all()
+    return render(request, "auctions/watchlist.html", {
+        "watchlist": watchlists
+    })
+

@@ -5,45 +5,48 @@
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-5">
                 <div class="row p-3">
-                    <div class="col-12 mt-3 mb-3">
+                    <div class="col-12 mb-3">
                         {% if listing.image %}
                             <img src="{{ listing.image }}" alt="{{ listing.title }}" class="img-fluid">
                         {% else %}
                             <img src="https://www.hwh-web.at/images/no-image-available.png" alt="{{ listing.title }}" class="img-fluid">
                         {% endif %}
                     </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-7 mt-3">
+                <div class="row">
+                    <div class="col-6 mt-3"><h5>{{ listing.title }}</h5></div>
                     {% if user.is_authenticated %}
-                        <div class="col-12 px-5">
+                        <div class="col-6">
                             <div class="row">
                                 {% if is_in_watchlist %}
                                     <form form class="col-6" action="{% url 'remove_to_watchlist' listing_id=listing.id %}" method="POST">
                                         {% csrf_token %}
-                                        <div class="row"><input type="submit" class="col-12" value="remove to watchlist"></div>
+                                        <div class="row"><input type="submit" class="col-12" name="remove_to_watchlist" value="remove to watchlist"></div>
                                     </form>
                                 {% else %}
                                     <form form class="col-6" action="{% url 'add_to_watchlist' listing_id=listing.id %}" method="POST">
                                         {% csrf_token %}
-                                        <div class="row"><input type="submit" class="col-12" value="add to watchlist"></div>
+                                        <div class="row"><input type="submit" class="col-12" name="add_to_watchlist" value="add to watchlist"></div>
                                     </form>
                                 {% endif %}
                             </div>
                         </div>
                     {% endif %}
-                </div>
-            </div>
-            <div class="col-12 col-sm-12 col-lg-7 mt-3">
-                <div class="row">
-                    <div class="col-12 mt-3"><h3>{{ listing.title }}</h3></div>
                     <div class="col-12"><hr></div>
                     <div class="col-12">
                         <div class="row">
+                            {% if message %}
+                                <div class="col-12"><p>{{ message }}</p></div>
+                            {% endif %}
                             <div class="col-12 mt-3">Place a bid</div>
-                            <form action="" method="POST" class="col-6 p-3">
+                            <form action="{% url 'bid' listing_id=listing.id %}" method="POST" class="col-6 p-3">
                                 {% csrf_token %}
                                 <div class="row">
                                     <div class="col-12">
-                                        <input type="number" min="1" required>
-                                        <input type="submit" name="bid" value="bid now">
+                                        <input type="number" min="1" name="bid" required>
+                                        <input type="submit" name="place_bid" value="Bid">
                                     </div>
                                     <div class="col-4"></div>
                                 </div>
