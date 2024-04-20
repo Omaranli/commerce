@@ -1,6 +1,6 @@
 {% extends "auctions/layout.html" %}
 
-{% block body%}
+{% block body %}
     <div class="container">
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-5">
@@ -16,43 +16,70 @@
             </div>
             <div class="col-12 col-sm-12 col-lg-7 mt-3">
                 <div class="row">
-                    <div class="col-6 mt-3"><h5>{{ listing.title }}</h5></div>
+                    <div class="col-6 p-3"><h5>{{ listing.title }}</h5></div>
                     {% if user.is_authenticated %}
                         <div class="col-6">
                             <div class="row">
-                                {% if is_in_watchlist %}
-                                    <form form class="col-6" action="{% url 'remove_to_watchlist' listing_id=listing.id %}" method="POST">
-                                        {% csrf_token %}
-                                        <div class="row"><input type="submit" class="col-12" name="remove_to_watchlist" value="remove to watchlist"></div>
-                                    </form>
+                                {% if listing.creator != user %}
+                                    {% if is_in_watchlist %}
+                                        <form form class="col-6" action="{% url 'remove_to_watchlist' listing_id=listing.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <div class="row"><input type="submit" class="col-12 bg-danger" name="remove_to_watchlist" value="remove to watchlist"></div>
+                                        </form>
+                                    {% else %}
+                                        <form form class="col-6" action="{% url 'add_to_watchlist' listing_id=listing.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <div class="row"><input type="submit" class="col-12" name="add_to_watchlist" value="add to watchlist"></div>
+                                        </form>
+                                    {% endif %}
                                 {% else %}
-                                    <form form class="col-6" action="{% url 'add_to_watchlist' listing_id=listing.id %}" method="POST">
-                                        {% csrf_token %}
-                                        <div class="row"><input type="submit" class="col-12" name="add_to_watchlist" value="add to watchlist"></div>
-                                    </form>
+                                    {% if listing.is_active %}
+                                        <form form class="col-6" action="{% url 'close_auction' listing_id=listing.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <div class="row"><input type="submit" class="col-12 bg-success" name="close_auction" value="Close"></div>
+                                        </form>
+                                    {% else %}
+                                        <h5 class="p-3">You closed this auction </h5>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12"><hr></div>
+                        <div class="col-12">
+                            <div class="row">
+                                {% if listing.creator != user %}
+                                    {% if listing.is_active %}
+                                        {% if message %}
+                                            <div class="col-12"><p>{{ message }}</p></div>
+                                        {% endif %}
+                                        <div class="col-12 mt-3">Place a bid</div>
+                                        <form action="{% url 'bid' listing_id=listing.id %}" method="POST" class="col-6 p-3">
+                                            {% csrf_token %}
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <input type="number" min="1" name="bid" required>
+                                                    <input type="submit" name="place_bid" value="Bid">
+                                                </div>
+                                                <div class="col-4"></div>
+                                            </div>
+                                        </form>
+                                    {% elif not listing.is_active and listing.winner == user %}
+                                        <div class="col-12 text-success"><h5>congratulations {{ listing.winner }}, you won</h5></div>
+                                    {% elif not listing.is_active %}
+                                        <div class="col-12"><h4 class="text-danger">auction closed</h4></div>
+                                    {% endif %}
+                                {% else %}
+                                    {% if listing.winner %}
+                                        <div class="col-12"><h5>{{ listing.winner }} won this auction</h5></div>
+                                    {% else %}
+                                        {% if not listing.is_active %}
+                                            <div class="col-12"><h5>There is no winner</h5></div>
+                                        {% endif %}
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </div>
                     {% endif %}
-                    <div class="col-12"><hr></div>
-                    <div class="col-12">
-                        <div class="row">
-                            {% if message %}
-                                <div class="col-12"><p>{{ message }}</p></div>
-                            {% endif %}
-                            <div class="col-12 mt-3">Place a bid</div>
-                            <form action="{% url 'bid' listing_id=listing.id %}" method="POST" class="col-6 p-3">
-                                {% csrf_token %}
-                                <div class="row">
-                                    <div class="col-12">
-                                        <input type="number" min="1" name="bid" required>
-                                        <input type="submit" name="place_bid" value="Bid">
-                                    </div>
-                                    <div class="col-4"></div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
                     <div class="col-12 my-3"><u>Description</u></div>
                     <div class="col-12"><p>{{ listing.description }}</p></div>
                     <div class="col-6">
@@ -72,10 +99,16 @@
                             <div class="col-12 p-3">
                                 <div class="row">
                                     {% if listing.bid %}
-                                        <div class="col-5">Current Bid:</div>
+                                        {% if listing.is_active %}
+                                            <div class="col-5">Current Bid:</div>
+                                        {% else %}
+                                            <div class="col-5">last Bid:</div>
+                                        {% endif %}
                                         <div class="col-7"><strong>$ {{ listing.bid }}</strong></div>
                                     {% else %}
-                                        <div class="col-12">No bid yet. be the first to bid</div>
+                                        {% if listing.is_active %}
+                                            <div class="col-12">No bid yet. be the first to bid</div>
+                                        {% endif %}
                                     {% endif %}
                                 </div>
                             </div>

@@ -49,7 +49,6 @@ def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-        
         # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
@@ -84,6 +83,7 @@ class ListingForm(forms.Form):
         })
         
     )
+
     category = forms.ModelChoiceField(queryset=Category.objects.all(),
         required=False,
         widget=forms.Select(attrs={
@@ -101,6 +101,7 @@ class ListingForm(forms.Form):
             'min': 1
         })
         )
+    
     image = forms.URLField(
         required=False,
         widget=forms.TextInput(attrs={
@@ -109,6 +110,7 @@ class ListingForm(forms.Form):
             'name': 'image'
         })
     )
+
     description = forms.CharField(
         max_length=1000,
         widget=forms.Textarea(attrs={
@@ -123,6 +125,7 @@ class ListingForm(forms.Form):
 
 @login_required(login_url="login")
 def new_listing(request):
+    # create a new listing
     if request.method == "POST":
         form = ListingForm(request.POST)
         if form.is_valid():
@@ -133,8 +136,10 @@ def new_listing(request):
             image = form.cleaned_data.get('image') 
             description = form.cleaned_data['description']
             listing = Listing.objects.create(title=title, price=price, description=description, creator=user)
+            # check if the user specified a category
             if category:
                 listing.category = category
+                # check if the user gave a URL for the image
             if image:
                 listing.image = image
             listing.save()
@@ -148,83 +153,124 @@ def new_listing(request):
 
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
-    user = request.user
+    user = request.user # get the authenticated user
+    # check if the user is authenticated
     if user.is_authenticated:
+        # check if the listing is in the user's watchlist
         is_in_watchlist = listing in user.watchlist.all()
     else:
         is_in_watchlist = False
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "is_in_watchlist": is_in_watchlist,
+        "user": user
     })
 
 
 @login_required(login_url="login")
 def add_to_watchlist(request, listing_id):
-    user = request.user
-    listing = Listing.objects.get(pk=listing_id)
+    user = request.user # get the authenticated user
     if request.method == "POST":
-        user.watchlist.add(listing) 
+        # get the listing
+        listing = Listing.objects.get(pk=listing_id)
+        # add the listing in the authenticated user's watchlist
+        user.watchlist.add(listing)
+        # redirect to the listing page
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
     
     
 @login_required(login_url="login")
 def remove_to_watchlist(request, listing_id):
-    user = request.user
-    listing = Listing.objects.get(pk=listing_id)
+    user = request.user # get the authenticated user
     if request.method == "POST":
-        user.watchlist.remove(listing) 
+        # get the listing
+        listing = Listing.objects.get(pk=listing_id)
+        # remove the listing in the authenticated user's watchlist
+        user.watchlist.remove(listing)
+        # redirect to the listing page
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
     
 
 @login_required(login_url="login")
-def watchlist(request):
+def user_watchlist(request):
+    # this view render the wathclist template with all the authenticated user's listings
     user = request.user
     watchlists = user.watchlist.all()
     return render(request, "auctions/watchlist.html", {
-        "watchlist": watchlists
+        "watchlist": watchlists,
+        "user": user
     })
 
 
 @login_required(login_url="login")
 def bid(request, listing_id):
-    message = ""
-    was_auctioned = False
-    user = request.user
-    listing = Listing.objects.get(pk=listing_id)
-    if request.method == "POST":
+    message = "" # initialize the variable message with a empty string
+    was_auctioned = False # intialize the variable to False
+    user = request.user # get the authenticated user
+    if request.method == "POST": # if the form is submited
+        # get the listing by his id
+        listing = Listing.objects.get(pk=listing_id)
+        # retrieve the entered amount by converting it to a decimal number
         placed_bid = float(request.POST["bid"])
+        # whene there is no bid and the user entered an amount lower than the starting price
         if listing.bid and placed_bid <= listing.bid:
+            # render the template with an error message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
                 "message": "Error: Your bid must be higher than the current bid."
-            }) 
+            })
+        # whene there at list one bid and the user entered an amount lower than the current bid
         elif placed_bid <= listing.price:
+            # render the template with an error message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
                 "message": "Error: Your bid must be higher than the starting price."
             })
         else:
+            # if the bid is higher than the starting price and the current bid
             listing.bid = placed_bid
+            # was_auctionned is now true
             was_auctioned = True
+        # if was_auctionned is true (the bid meete the criteria)
         if was_auctioned:
-            listing.save()  # Sauvegarder les modifications de l'annonce
-            Bid.objects.create(amount=placed_bid, user=user, item=listing)
+            listing.save()  # save the modifictions
+            # create a new bid object
+            bid = Bid.objects.create(amount=placed_bid, user=user, item=listing)
+            # render the template with a success message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "message": "Your bid has been added successfully. You're in first position."
+                "message": "Your bid has been added successfully. You're in first position.",
             })
+        # redirect to the same page
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
     return render(request, "auctions/listing.html", {
         "listing": listing,
+        "user": user,
+        "bid": bid
         })
 
 
 @login_required(login_url="login")
-def watchlist(request):
-    user = request.user
-    watchlists = user.watchlist.all()
-    return render(request, "auctions/watchlist.html", {
-        "watchlist": watchlists
+def close_auction(request, listing_id):
+    user = request.user # get the authenticated user
+    if request.method == "POST":
+        # retrieve the listing with his id
+        listing = Listing.objects.get(pk=listing_id)
+        # mark the listing as inactive
+        listing.is_active =  False
+        # cheking if there is a list one bid
+        if listing.bids.exists():
+            # get the current bid
+            highest_bid = listing.bids.order_by('-amount').first()
+            # the winner is the authenticated user
+            listing.winner = highest_bid.user
+        else:
+            # if there is no bid, there is no winner
+            listing.winner = None
+        listing.save() # save the chages
+        return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    return render(request, "auctions/listing.html", {
+        "listing": listing,
+        "user": user,
     })
 
