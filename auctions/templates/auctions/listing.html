@@ -134,30 +134,31 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 mt-5 text-center">
-                <div class="row">
-                    <div class="col-12 col-lg-6">
-                        <form class="row py-3" action="" method="post">
-                            {% csrf_token %}
-                            <div class="col-12 text-center">
-                                <input class="px-5" type="text" name="comment" required>
-                                <input type="submit" name="comment" value="comment">
-                            </div>
-                        </form>
+            {% if user.is_authenticated %}
+                <div class="col-12 mt-5 text-center">
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <form class="row py-3" action="{% url 'comment' listing_id=listing.id %}" method="POST">
+                                {% csrf_token %}
+                                <div class="col-12 text-center">
+                                    <input class="px-5" type="text" name="comment" required>
+                                    <input type="submit" name="submit_comment" value="comment">
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-lg-6 mt-3">
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
-                sdkjflksqdlkflqskjflkflkjdlfjsldjflkqsjdf
+            {% else %}
+                <div class="col-12 text-center">
+                    <h4>Comments</h4>
+                </div>
+            {% endif %}
+            <div class="col-12 col-lg-6 mt-3" style="max-height: 300px; overflow-y: scroll;">
+                <div class="row">
+                    {% for comment in comments %}
+                        <div class="col-12">{{ comment.comment }}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>

@@ -254,7 +254,7 @@ def bid(request, listing_id):
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "user": user,
-        "bid": bid
+        "bid": bid,
         })
 
 
@@ -282,3 +282,27 @@ def close_auction(request, listing_id):
         "user": user,
     })
 
+login_required(login_url="login")
+def comment(request, listing_id):
+    booleen = False
+    listing = Listing.objects.get(pk=listing_id)
+    # get all the comment of this listing
+    comments = listing.comments.all()
+    if request.method == "POST":
+        user = request.user
+        # get the comment
+        comment_text = request.POST.get("comment", "")
+        if comment_text:
+            comment = Comment.objects.create(user=user, listing=listing, comment=comment_text)
+            comment.save()
+        else:
+            # render the template with an error message
+            return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "error_comment": "you didn't enter anything"
+            })
+        return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "comments": comments,
+            })
