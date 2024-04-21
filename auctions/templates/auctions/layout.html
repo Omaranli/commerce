@@ -19,6 +19,20 @@
             .disabled:hover{
                 color: #919191;
             }
+            
+            
+            .category {
+                background-color: #4f4f4f;
+                background-image: linear-gradient(to right, rgb(181, 244, 56) 0%, rgb(191, 246, 82) 50%, transparent 50%, transparent 100%);
+                    background-size: 200% 100%;
+                    background-position: 100%;
+                    border-radius: 4px;
+                    transition: background-position 1s;
+            }
+
+            .category:hover {
+                background-position: 0%;
+            }
         </style>
     </head>
     <body>
@@ -49,6 +63,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+                        </li>
                         {% if user.is_authenticated %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'new_listing' %}">new listing</a>
@@ -66,9 +83,6 @@
                                         {{ user.listings.count }}
                                     </sup>
                                 </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="">Categories</a>
                             </li>
                         {% endif %}
                     </ul>

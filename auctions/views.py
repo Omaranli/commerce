@@ -291,7 +291,9 @@ def comment(request, listing_id):
         user = request.user
         # get the comment
         comment_text = request.POST.get("comment", "")
+        # if the autheticated user wrote a comment
         if comment_text:
+            # create a new object comment
             comment = Comment.objects.create(user=user, listing=listing, comment=comment_text)
             comment.save()
         else:
@@ -301,6 +303,24 @@ def comment(request, listing_id):
                 "error_comment": "You didn't enter anything."
             })
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    # render the listing page if the request method is get
     return render(request, "auctions/listing.html", {
         "listing": listing,
+    })
+
+
+def all_categories(request):
+    categories = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": categories
+    })
+
+
+def category(request, category_name):
+    category = Category.objects.get(category_name=category_name)
+    category_listing = Listing.objects.filter(category=category)
+
+    return render(request, "auctions/listings_by_category.html", {
+        "category_listing": category_listing,
+        "category": category
     })
