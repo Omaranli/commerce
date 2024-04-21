@@ -201,6 +201,14 @@ def user_watchlist(request):
         "user": user
     })
 
+@login_required(login_url="login")
+def user_listings(request):
+    user = request.user
+    user_listings = Listing.objects.filter(creator=user)
+    return render(request, "auctions/user_listings.html", {
+        "user_listings": user_listings
+    })
+    
 
 @login_required(login_url="login")
 def bid(request, listing_id):

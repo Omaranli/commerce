@@ -1,10 +1,10 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2 align="center" class="m-3">Active Listings</h2>
+    <h2 align="center" class="m-3">My listings</h2>
     <div class="container-fluid">
         <div class="row d-flex flex-wrap justify-content-center">
-            {% for listing in listings %}
+            {% for listing in user_listings %}
                 <div class="col-12 col-sm-6 col-lg-2 border mx-3 mb-5">
                     <div class="row">
                         {% if listing.is_active %}
@@ -25,8 +25,8 @@
                         {% else %}
                             <a href="{% url 'listing' listing.id %}" class="col-12 text-center disabled">
                                 <div class="row" style="position: relative; height: auto;">
-                                    <h6 class="h3" style="position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); opacity: 1; color:rgb(255, 255, 255); background-color: rgb(223, 0, 0);">CLOSED</h6>
-                                    <div class="col-12 text-centerpt-3" style="opacity: 0.3;">
+                                    <h6 class="h3" style="position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); opacity: 1; color:rgb(255, 255, 255); background-color: rgb(223, 0, 0);">CLOSED</h6>
+                                    <div class="col-12 text-center pt-3" style="opacity: 0.3;">
                                         {% if listing.image %}
                                             <img src="{{ listing.image }}" alt="{{ listing.title }}" class="img-fluid p-3" style="max-height: 250px; background-color: rgb(108, 108, 108);">
                                         {% else %}
@@ -51,6 +51,9 @@
                         </div>
                     </div>
                 </div>
+                {% empty %}
+                <div class="col-12 text-center mt-5"><h2>No listing added in your watchlist</h2></div>
+                <div class=""><a href="{% url 'index' %}">active listings</a></div>
             {% endfor %}
         </div>
     </div>

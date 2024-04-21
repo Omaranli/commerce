@@ -24,8 +24,9 @@
                             </a>
                         {% else %}
                             <a href="{% url 'listing' listing.id %}" class="col-12 text-center disabled">
-                                <div class="row">
-                                    <div class="col-12 text-center pt-3" >
+                                <div class="row" style="position: relative; height: auto;">
+                                    <h6 class="h3" style="position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); opacity: 1; color:rgb(255, 255, 255); background-color: rgb(223, 0, 0);">CLOSED</h6>
+                                    <div class="col-12 text-center pt-3" style="opacity: 0.3;">
                                         {% if listing.image %}
                                             <img src="{{ listing.image }}" alt="{{ listing.title }}" class="img-fluid p-3" style="max-height: 250px; background-color: rgb(108, 108, 108);">
                                         {% else %}

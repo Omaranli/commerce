@@ -55,10 +55,20 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'display_watchlist' %}">watchlist
-                                    <sup class="px-2" style="color: #000000; font-size: 14px; border: solid 1px white; border-radius: 10px; background-color: #ffffff;">
+                                    <sup class="px-1" style="color: #000000; font-size: 14px; border: solid 1px white; border-radius: 10px; background-color: #ffffff;">
                                         {{ user.watchlist.count }}
                                     </sup>
                                 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'display_user_listings' %}">My Listings
+                                    <sup class="px-1" style="color: #000000; font-size: 14px; border: solid 1px white; border-radius: 10px; background-color: #ffffff;">
+                                        {{ user.listings.count }}
+                                    </sup>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="">Categories</a>
                             </li>
                         {% endif %}
                     </ul>
