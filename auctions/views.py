@@ -153,6 +153,7 @@ def new_listing(request):
 
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
+    # get all the comments of this listing
     user = request.user # get the authenticated user
     # check if the user is authenticated
     if user.is_authenticated:
@@ -163,7 +164,8 @@ def listing(request, listing_id):
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "is_in_watchlist": is_in_watchlist,
-        "user": user
+        "user": user,
+        "comments": listing.comments.all() 
     })
 
 
@@ -284,10 +286,7 @@ def close_auction(request, listing_id):
 
 login_required(login_url="login")
 def comment(request, listing_id):
-    booleen = False
-    listing = Listing.objects.get(pk=listing_id)
-    # get all the comment of this listing
-    comments = listing.comments.all()
+    listing = Listing.objects.get(id=listing_id)
     if request.method == "POST":
         user = request.user
         # get the comment
@@ -299,10 +298,9 @@ def comment(request, listing_id):
             # render the template with an error message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "error_comment": "you didn't enter anything"
+                "error_comment": "You didn't enter anything."
             })
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
     return render(request, "auctions/listing.html", {
-                "listing": listing,
-                "comments": comments,
-            })
+        "listing": listing,
+    })
