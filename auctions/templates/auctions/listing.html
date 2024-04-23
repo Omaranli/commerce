@@ -157,8 +157,8 @@
                             {% for comment in comments %}
                                 <div class="col-12"><small>{{ comment.user }} :  {{ comment.comment_datetime }}</small></div>
                                 <div class="col-12"><p>{{ comment.comment }}</p></div>
-                            {% empty %}
-                                <div class="col-12"><p>No comment, be the first to comment this auction</p></div>
+                                {% empty %}
+                                    <div class="col-12"><p>No comment, be the first to comment this auction</p></div>
                             {% endfor %}
                         </div>
                     </div>

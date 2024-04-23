@@ -200,7 +200,7 @@ def user_watchlist(request):
     watchlists = user.watchlist.all()
     return render(request, "auctions/watchlist.html", {
         "watchlist": watchlists,
-        "user": user
+        "user": user,
     })
 
 @login_required(login_url="login")
@@ -208,7 +208,7 @@ def user_listings(request):
     user = request.user
     user_listings = Listing.objects.filter(creator=user)
     return render(request, "auctions/user_listings.html", {
-        "user_listings": user_listings
+        "user_listings": user_listings,
     })
     
 
@@ -216,10 +216,11 @@ def user_listings(request):
 def bid(request, listing_id):
     message = "" # initialize the variable message with a empty string
     was_auctioned = False # intialize the variable to False
-    user = request.user # get the authenticated user
     if request.method == "POST": # if the form is submited
+        user = request.user # get the authenticated user
         # get the listing by his id
         listing = Listing.objects.get(pk=listing_id)
+        is_in_watchlist = listing in user.watchlist.all()
         # retrieve the entered amount by converting it to a decimal number
         placed_bid = float(request.POST["bid"])
         # whene there is no bid and the user entered an amount lower than the starting price
@@ -227,14 +228,18 @@ def bid(request, listing_id):
             # render the template with an error message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "message": "Error: Your bid must be higher than the current bid."
+                "is_in_watchlist": is_in_watchlist,
+                "message": "Error: Your bid must be higher than the current bid.",
+                "comments": listing.comments.all() 
             })
         # whene there at list one bid and the user entered an amount lower than the current bid
         elif placed_bid <= listing.price:
             # render the template with an error message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "message": "Error: Your bid must be higher than the starting price."
+                "is_in_watchlist": is_in_watchlist,
+                "message": "Error: Your bid must be higher than the starting price.",
+                "comments": listing.comments.all() 
             })
         else:
             # if the bid is higher than the starting price and the current bid
@@ -246,19 +251,21 @@ def bid(request, listing_id):
             listing.save()  # save the modifictions
             # create a new bid object
             bid = Bid.objects.create(amount=placed_bid, user=user, item=listing)
+            # Check if the listing is in the user's watchlist after bid submission
+            is_in_watchlist = listing in user.watchlist.all()
             # render the template with a success message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "message": "Your bid has been added successfully. You're in first position.",
+                "is_in_watchlist": is_in_watchlist,
+                "message": "your bid has been placed successfully: you are in 1st position",
+                "comments": listing.comments.all() 
             })
-        # redirect to the same page
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
+    # Redirect to the same page
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "user": user,
-        "bid": bid,
-        })
-
+        "comments": listing.comments.all() 
+    })
 
 @login_required(login_url="login")
 def close_auction(request, listing_id):
@@ -282,6 +289,7 @@ def close_auction(request, listing_id):
     return render(request, "auctions/listing.html", {
         "listing": listing,
         "user": user,
+        "comments": listing.comments.all() 
     })
 
 login_required(login_url="login")
@@ -290,6 +298,8 @@ def comment(request, listing_id):
     if request.method == "POST":
         user = request.user
         # get the comment
+        # check if the listing is in the user's watchlist
+        is_in_watchlist = listing in user.watchlist.all()
         comment_text = request.POST.get("comment", "")
         # if the autheticated user wrote a comment
         if comment_text:
@@ -300,19 +310,22 @@ def comment(request, listing_id):
             # render the template with an error message
             return render(request, "auctions/listing.html", {
                 "listing": listing,
-                "error_comment": "You didn't enter anything."
+                "error_comment": "You didn't enter anything.",
+                "comments": listing.comments.all() 
             })
         return HttpResponseRedirect(reverse("listing", args=(listing.id,)))
     # render the listing page if the request method is get
     return render(request, "auctions/listing.html", {
         "listing": listing,
+        "is_in_watchlist": is_in_watchlist,
+        "comments": listing.comments.all() 
     })
 
 
 def all_categories(request):
     categories = Category.objects.all()
     return render(request, "auctions/categories.html", {
-        "categories": categories
+        "categories": categories,
     })
 
 
@@ -322,5 +335,5 @@ def category(request, category_name):
 
     return render(request, "auctions/listings_by_category.html", {
         "category_listing": category_listing,
-        "category": category
+        "category": category,
     })
